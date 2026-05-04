@@ -1,0 +1,64 @@
+version: '3.8'
+ 
+services:
+  db:
+    image: mysql:8.0
+    container_name: gerador-db
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: passgeneration
+    ports:
+      - "3307:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+ 
+  backend:
+    build:
+      context: ./passgeneration
+    container_name: gerador-backend
+    restart: always
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:mysql://db:3306/passgeneration?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=root
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q http://localhost:8080/ -O /dev/null 2>/dev/null || true"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 45s
+ 
+  frontend:
+    build:
+      context: ./Gerador-Senha-Mobile
+    container_name: gerador-frontend
+    restart: always
+    ports:
+      - "8081:8081"
+    environment:
+      - EXPO_WEB_PORT=8081
+      - REACT_NATIVE_PACKAGER_HOSTNAME=localhost
+      - API_URL=http://localhost:8080
+    depends_on:
+      backend:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:8081/"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+ 
+volumes:
+  db_data:
