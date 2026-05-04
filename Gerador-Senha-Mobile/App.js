@@ -12,18 +12,18 @@ import HistoricoSenha from "./screens/HistoricoSenha";
 const Stack = createNativeStackNavigator();
 
 export default function App() {
-  const [logado, setLogado] = useState(null);
+  const [isAuthenticated, setIsAuthenticated] = useState(null);
 
-  const checkToken = async () => {
+  const refreshSession = async () => {
     const token = await AsyncStorage.getItem("token");
-    setLogado(!!token);
+    setIsAuthenticated(!!token);
   };
 
   useEffect(() => {
-    checkToken();
+    refreshSession();
   }, []);
 
-  if (logado === null) return null;
+  if (isAuthenticated === null) return null;
 
   return (
     <NavigationContainer>
@@ -35,21 +35,29 @@ export default function App() {
           headerTitleStyle: { fontWeight: "700" },
         }}
       >
-        {!logado ? (
+        {!isAuthenticated ? (
           <>
-            <Stack.Screen name="SignIn">
-              {(props) => <SignIn {...props} onLogin={checkToken} />}
+            <Stack.Screen name="SignIn" options={{ title: "Entrar" }}>
+              {(props) => <SignIn {...props} onLogin={refreshSession} />}
             </Stack.Screen>
 
-            <Stack.Screen name="SignUp" component={SignUp} />
+            <Stack.Screen
+              name="SignUp"
+              component={SignUp}
+              options={{ title: "Criar Conta" }}
+            />
           </>
         ) : (
           <>
-            <Stack.Screen name="Home">
-              {(props) => <Home {...props} onLogout={checkToken} />}
+            <Stack.Screen name="Home" options={{ title: "Cofre de Senhas" }}>
+              {(props) => <Home {...props} onLogout={refreshSession} />}
             </Stack.Screen>
 
-            <Stack.Screen name="Historico" component={HistoricoSenha} />
+            <Stack.Screen
+              name="Historico"
+              component={HistoricoSenha}
+              options={{ title: "Historico de Senhas" }}
+            />
           </>
         )}
       </Stack.Navigator>

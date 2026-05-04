@@ -3,11 +3,11 @@ version: '3.8'
 services:
   db:
     image: mysql:8.0
-    container_name: gerador-db
+    container_name: password-vault-db
     restart: always
     environment:
       MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: passgeneration
+      MYSQL_DATABASE: password_vault
     ports:
       - "3307:3306"
     volumes:
@@ -21,12 +21,12 @@ services:
   backend:
     build:
       context: ./passgeneration
-    container_name: gerador-backend
+    container_name: password-vault-backend
     restart: always
     ports:
       - "8080:8080"
     environment:
-      - SPRING_DATASOURCE_URL=jdbc:mysql://db:3306/passgeneration?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+      - SPRING_DATASOURCE_URL=jdbc:mysql://db:3306/password_vault?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
       - SPRING_DATASOURCE_USERNAME=root
       - SPRING_DATASOURCE_PASSWORD=root
     depends_on:
@@ -42,7 +42,7 @@ services:
   frontend:
     build:
       context: ./Gerador-Senha-Mobile
-    container_name: gerador-frontend
+    container_name: password-vault-frontend
     restart: always
     ports:
       - "8081:8081"

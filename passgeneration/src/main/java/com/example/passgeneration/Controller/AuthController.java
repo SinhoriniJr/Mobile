@@ -14,27 +14,27 @@ import com.example.passgeneration.Service.AuthService;
 public class AuthController {
 
     @Autowired
-    private AuthService service;
+    private AuthService authService;
 
     @PostMapping("/signup")
-    public ResponseEntity<?> signup(@RequestBody Map<String, String> body) {
+    public ResponseEntity<?> signup(@RequestBody Map<String, String> requestBody) {
 
-        service.signup(
-                body.get("nome"),
-                body.get("email"),
-                body.get("senha"),
-                body.get("repetirSenha")
+        authService.signup(
+                requestBody.get("nome"),
+                requestBody.get("email"),
+                requestBody.get("senha"),
+                requestBody.get("repetirSenha")
         );
 
-        return ResponseEntity.ok("Usuário criado");
+        return ResponseEntity.ok("Usuario criado");
     }
 
     @PostMapping("/signin")
-    public ResponseEntity<?> signin(@RequestBody Map<String, String> body) {
+    public ResponseEntity<?> signin(@RequestBody Map<String, String> requestBody) {
 
-        String token = service.signin(
-                body.get("email"),
-                body.get("senha")
+        String token = authService.signin(
+                requestBody.get("email"),
+                requestBody.get("senha")
         );
 
         return ResponseEntity.ok(Map.of("token", token));

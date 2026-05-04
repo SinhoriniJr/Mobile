@@ -15,40 +15,40 @@ import com.example.passgeneration.Utils.JwtUtil;
 public class SenhaController {
 
     @Autowired
-    private SenhaService service;
+    private SenhaService passwordService;
 
     @Autowired
     private JwtUtil jwtUtil;
 
-    private String getEmail(String token) {
-        return jwtUtil.getEmail(token.replace("Bearer ", ""));
+    private String getEmailFromToken(String authorizationHeader) {
+        return jwtUtil.getEmail(authorizationHeader.replace("Bearer ", ""));
     }
 
     @PostMapping
     public ResponseEntity<?> criar(
-            @RequestHeader("Authorization") String token,
-            @RequestBody Map<String, String> body) {
+            @RequestHeader("Authorization") String authorizationHeader,
+            @RequestBody Map<String, String> requestBody) {
 
-        String email = getEmail(token);
+        String email = getEmailFromToken(authorizationHeader);
 
         return ResponseEntity.ok(
-                service.criar(body.get("name"), body.get("pass"), email)
+                passwordService.criar(requestBody.get("name"), requestBody.get("pass"), email)
         );
     }
 
     @GetMapping
     public ResponseEntity<?> listar(
-            @RequestHeader("Authorization") String token) {
+            @RequestHeader("Authorization") String authorizationHeader) {
 
-        String email = getEmail(token);
+        String email = getEmailFromToken(authorizationHeader);
 
-        return ResponseEntity.ok(service.listar(email));
+        return ResponseEntity.ok(passwordService.listar(email));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deletar(@PathVariable Long id) {
 
-        service.deletar(id);
+        passwordService.deletar(id);
 
         return ResponseEntity.ok("Senha deletada");
     }

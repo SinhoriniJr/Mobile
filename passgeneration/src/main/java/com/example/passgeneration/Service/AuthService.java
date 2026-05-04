@@ -12,44 +12,44 @@ import com.example.passgeneration.Utils.JwtUtil;
 public class AuthService {
 
     @Autowired
-    private UserRepository repository;
+    private UserRepository userRepository;
 
     @Autowired
-    private JwtUtil jwtUtil;
+    private JwtUtil tokenUtil;
 
-    private BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
+    private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
     public void signup(String nome, String email, String senha, String repetirSenha) {
 
         if (!senha.equals(repetirSenha)) {
-            throw new RuntimeException("Senhas não coincidem");
+            throw new RuntimeException("Senhas nao coincidem");
         }
 
         if (!email.matches("^[A-Za-z0-9+_.-]+@(.+)$")) {
-            throw new RuntimeException("Email inválido");
+            throw new RuntimeException("Email invalido");
         }
 
-        if (repository.findByEmail(email).isPresent()) {
-            throw new RuntimeException("Email já cadastrado");
+        if (userRepository.findByEmail(email).isPresent()) {
+            throw new RuntimeException("Email ja cadastrado");
         }
 
         User user = new User();
         user.setNome(nome);
         user.setEmail(email);
-        user.setSenha(encoder.encode(senha));
+        user.setSenha(passwordEncoder.encode(senha));
 
-        repository.save(user);
+        userRepository.save(user);
     }
 
     public String signin(String email, String senha) {
 
-        User user = repository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Usuario nao encontrado"));
 
-        if (!encoder.matches(senha, user.getSenha())) {
-            throw new RuntimeException("Senha inválida");
+        if (!passwordEncoder.matches(senha, user.getSenha())) {
+            throw new RuntimeException("Senha invalida");
         }
 
-        return jwtUtil.gerarToken(email);
+        return tokenUtil.gerarToken(email);
     }
 }

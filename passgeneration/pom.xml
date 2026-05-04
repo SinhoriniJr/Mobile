@@ -9,10 +9,10 @@
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.example</groupId>
-	<artifactId>passgeneration</artifactId>
+	<artifactId>password-vault-api</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name/>
-	<description/>
+	<name>password-vault-api</name>
+	<description>API de autenticacao e armazenamento para o sistema Cofre de Senhas</description>
 	<url/>
 	<licenses>
 		<license/>

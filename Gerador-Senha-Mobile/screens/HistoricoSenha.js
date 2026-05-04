@@ -2,27 +2,30 @@ import React, { useState, useEffect } from "react";
 import { View, Text, FlatList, Pressable } from "react-native";
 import { useIsFocused } from "@react-navigation/native";
 import * as Clipboard from "expo-clipboard";
-import { listarSenhas, deletarSenha } from "../service/senhaService";
+import {
+  listPasswordEntries,
+  deletePasswordEntry,
+} from "../service/senhaService";
 
 export default function HistoricoSenha({ navigation }) {
-  const [dados, setDados] = useState([]);
-  const [mostrar, setMostrar] = useState({});
-  const foco = useIsFocused();
+  const [savedPasswords, setSavedPasswords] = useState([]);
+  const [visiblePasswords, setVisiblePasswords] = useState({});
+  const isScreenFocused = useIsFocused();
 
-  const carregar = async () => {
+  const loadSavedPasswords = async () => {
     try {
-      const res = await listarSenhas();
-      setDados(res.data);
-      setMostrar({});
-    } catch (e) {
-      console.log(e);
+      const response = await listPasswordEntries();
+      setSavedPasswords(response.data);
+      setVisiblePasswords({});
+    } catch (error) {
+      console.log(error);
       alert("Erro ao carregar senhas");
     }
   };
 
   useEffect(() => {
-    if (foco) carregar();
-  }, [foco]);
+    if (isScreenFocused) loadSavedPasswords();
+  }, [isScreenFocused]);
 
   return (
     <View className="flex-1 bg-slate-50 px-5 py-6">
@@ -31,7 +34,7 @@ export default function HistoricoSenha({ navigation }) {
       </Text>
 
       <FlatList
-        data={dados}
+        data={savedPasswords}
         keyExtractor={(item) => item.id.toString()}
         contentContainerClassName="pb-4"
         ListEmptyComponent={
@@ -46,14 +49,17 @@ export default function HistoricoSenha({ navigation }) {
             <View>
               <Text className="font-bold text-slate-900">{item.name}</Text>
               <Text className="tracking-[2px] text-slate-700">
-                {mostrar[item.id] ? item.pass : "********"}
+                {visiblePasswords[item.id] ? item.pass : "********"}
               </Text>
             </View>
 
             <View className="flex-row gap-3">
               <Pressable
                 onPress={() =>
-                  setMostrar((p) => ({ ...p, [item.id]: !p[item.id] }))
+                  setVisiblePasswords((currentVisiblePasswords) => ({
+                    ...currentVisiblePasswords,
+                    [item.id]: !currentVisiblePasswords[item.id],
+                  }))
                 }
               >
                 <Text className="text-xs font-semibold text-blue-600">VER</Text>
@@ -73,10 +79,10 @@ export default function HistoricoSenha({ navigation }) {
               <Pressable
                 onPress={async () => {
                   try {
-                    await deletarSenha(item.id);
-                    carregar();
-                  } catch (e) {
-                    console.log(e);
+                    await deletePasswordEntry(item.id);
+                    loadSavedPasswords();
+                  } catch (error) {
+                    console.log(error);
                     alert("Erro ao deletar");
                   }
                 }}

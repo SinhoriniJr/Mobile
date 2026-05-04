@@ -1,9 +1,9 @@
 import api from "./api";
 
-export const signup = (data) => {
-  return api.post("/signup", data);
+export const registerUser = (userData) => {
+  return api.post("/signup", userData);
 };
 
-export const signin = (data) => {
-  return api.post("/signin", data);
+export const loginUser = (credentials) => {
+  return api.post("/signin", credentials);
 };

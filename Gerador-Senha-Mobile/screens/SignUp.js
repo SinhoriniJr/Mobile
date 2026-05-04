@@ -1,47 +1,51 @@
 import React, { useState } from "react";
 import { View, Text, TextInput, Pressable } from "react-native";
-import { signup } from "../service/authService";
+import { registerUser } from "../service/authService";
 
 export default function SignUp({ navigation }) {
-  const [nome, setNome] = useState("");
+  const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
-  const [senha, setSenha] = useState("");
-  const [confirmar, setConfirmar] = useState("");
+  const [password, setPassword] = useState("");
+  const [passwordConfirmation, setPasswordConfirmation] = useState("");
 
-  const valido = nome && email && senha && senha === confirmar;
+  const isFormValid =
+    fullName &&
+    email &&
+    password &&
+    password === passwordConfirmation;
 
-  const emailValido = (value) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+  const isValidEmail = (value) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
 
   const handleSignup = async () => {
-    if (!emailValido(email)) {
+    if (!isValidEmail(email)) {
       return alert("Email em formato invalido");
     }
 
     try {
-      await signup({
-        nome,
+      await registerUser({
+        nome: fullName,
         email,
-        senha,
-        repetirSenha: confirmar,
+        senha: password,
+        repetirSenha: passwordConfirmation,
       });
 
       alert("Cadastro realizado!");
       navigation.navigate("SignIn", { email });
-    } catch (e) {
-      console.log("ERRO SIGNUP:", e.response || e);
+    } catch (error) {
+      console.log("ERRO SIGNUP:", error.response || error);
 
-      let msg = "Erro no cadastro";
-      const status = e.response?.status;
+      let message = "Erro no cadastro";
+      const status = error.response?.status;
 
       if (status === 403) {
-        msg = "Email ja cadastrado";
+        message = "Email ja cadastrado";
       } else if (status === 400) {
-        msg = "Dados invalidos";
-      } else if (e.response?.data?.message) {
-        msg = e.response.data.message;
+        message = "Dados invalidos";
+      } else if (error.response?.data?.message) {
+        message = error.response.data.message;
       }
 
-      alert(msg);
+      alert(message);
     }
   };
 
@@ -54,8 +58,8 @@ export default function SignUp({ navigation }) {
       <Text className="mb-1 text-base text-slate-700">Nome</Text>
       <TextInput
         className="mb-4 rounded-md border border-black bg-accent-500 px-3 py-2.5 text-base text-slate-900"
-        value={nome}
-        onChangeText={setNome}
+        value={fullName}
+        onChangeText={setFullName}
       />
 
       <Text className="mb-1 text-base text-slate-700">Email</Text>
@@ -71,23 +75,23 @@ export default function SignUp({ navigation }) {
       <TextInput
         className="mb-4 rounded-md border border-black bg-accent-500 px-3 py-2.5 text-base text-slate-900"
         secureTextEntry
-        value={senha}
-        onChangeText={setSenha}
+        value={password}
+        onChangeText={setPassword}
       />
 
       <Text className="mb-1 text-base text-slate-700">Confirmar Senha</Text>
       <TextInput
         className="mb-5 rounded-md border border-black bg-accent-500 px-3 py-2.5 text-base text-slate-900"
         secureTextEntry
-        value={confirmar}
-        onChangeText={setConfirmar}
+        value={passwordConfirmation}
+        onChangeText={setPasswordConfirmation}
       />
 
       <Pressable
         className={`items-center rounded-md px-3 py-3 ${
-          valido ? "bg-zinc-300" : "bg-zinc-300 opacity-50"
+          isFormValid ? "bg-zinc-300" : "bg-zinc-300 opacity-50"
         }`}
-        disabled={!valido}
+        disabled={!isFormValid}
         onPress={handleSignup}
       >
         <Text className="font-bold text-slate-900">REGISTRAR</Text>

@@ -19,23 +19,23 @@ public class SenhaService {
     @Autowired
     private UserRepository userRepository;
 
-    public Senha criar(String name, String pass, String email) {
+    public Senha criar(String applicationName, String passwordValue, String email) {
 
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
+                .orElseThrow(() -> new RuntimeException("Usuario nao encontrado"));
 
-        Senha senha = new Senha();
-        senha.setName(name);
-        senha.setPass(pass);
-        senha.setUser(user);
+        Senha passwordEntry = new Senha();
+        passwordEntry.setName(applicationName);
+        passwordEntry.setPass(passwordValue);
+        passwordEntry.setUser(user);
 
-        return senhaRepository.save(senha);
+        return senhaRepository.save(passwordEntry);
     }
 
     public List<Senha> listar(String email) {
 
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
+                .orElseThrow(() -> new RuntimeException("Usuario nao encontrado"));
 
         return senhaRepository.findByUserId(user.getId());
     }

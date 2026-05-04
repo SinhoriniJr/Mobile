@@ -2,38 +2,40 @@ import React, { useState } from "react";
 import { View, Text, Pressable, Modal, TextInput } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as Clipboard from "expo-clipboard";
-import { generatePassword } from "../service/passwordService";
-import { criarSenha } from "../service/senhaService";
+import { generateSecurePassword } from "../service/passwordService";
+import { savePasswordEntry } from "../service/senhaService";
 
 export default function Home({ navigation, onLogout }) {
-  const [senha, setSenha] = useState("");
-  const [modal, setModal] = useState(false);
-  const [nome, setNome] = useState("");
+  const [generatedPassword, setGeneratedPassword] = useState("");
+  const [isSaveModalVisible, setIsSaveModalVisible] = useState(false);
+  const [passwordLabel, setPasswordLabel] = useState("");
 
-  const gerar = () => setSenha(generatePassword());
+  const handleGeneratePassword = () => {
+    setGeneratedPassword(generateSecurePassword());
+  };
 
-  const salvar = async () => {
+  const handleSavePassword = async () => {
     try {
-      await criarSenha({
-        name: nome,
-        pass: senha,
+      await savePasswordEntry({
+        name: passwordLabel,
+        pass: generatedPassword,
       });
 
-      setModal(false);
-      setNome("");
+      setIsSaveModalVisible(false);
+      setPasswordLabel("");
       navigation.navigate("Historico");
-    } catch (e) {
-      console.log(e);
+    } catch (error) {
+      console.log(error);
       alert("Erro ao salvar senha");
     }
   };
 
-  const copiar = async () => {
-    await Clipboard.setStringAsync(senha);
+  const handleCopyPassword = async () => {
+    await Clipboard.setStringAsync(generatedPassword);
     alert("Copiado");
   };
 
-  const logout = async () => {
+  const handleLogout = async () => {
     await AsyncStorage.removeItem("token");
     onLogout();
     alert("Logout realizado");
@@ -47,36 +49,36 @@ export default function Home({ navigation, onLogout }) {
   return (
     <View className="flex-1 items-center justify-center bg-white px-5">
       <Text className="mb-5 text-center text-3xl font-bold text-primary-600">
-        GERADOR DE SENHA
+        COFRE DE SENHAS
       </Text>
 
       <Text className="mb-5 text-2xl tracking-[2px] text-slate-900">
-        {senha || "********"}
+        {generatedPassword || "********"}
       </Text>
 
-      <Pressable className={actionButtonClass()} onPress={gerar}>
+      <Pressable className={actionButtonClass()} onPress={handleGeneratePassword}>
         <Text className="text-center font-semibold text-white">
           GERAR SENHA
         </Text>
       </Pressable>
 
       <Pressable
-        className={actionButtonClass(!!senha)}
-        disabled={!senha}
-        onPress={() => setModal(true)}
+        className={actionButtonClass(!!generatedPassword)}
+        disabled={!generatedPassword}
+        onPress={() => setIsSaveModalVisible(true)}
       >
         <Text className="text-center font-semibold text-white">SALVAR</Text>
       </Pressable>
 
       <Pressable
-        className={actionButtonClass(!!senha)}
-        disabled={!senha}
-        onPress={copiar}
+        className={actionButtonClass(!!generatedPassword)}
+        disabled={!generatedPassword}
+        onPress={handleCopyPassword}
       >
         <Text className="text-center font-semibold text-white">COPIAR</Text>
       </Pressable>
 
-      <Pressable className={actionButtonClass()} onPress={logout}>
+      <Pressable className={actionButtonClass()} onPress={handleLogout}>
         <Text className="text-center font-semibold text-white">SAIR</Text>
       </Pressable>
 
@@ -84,7 +86,7 @@ export default function Home({ navigation, onLogout }) {
         <Text className="mt-2 text-base text-slate-700">Ver Senhas</Text>
       </Pressable>
 
-      <Modal visible={modal} transparent animationType="fade">
+      <Modal visible={isSaveModalVisible} transparent animationType="fade">
         <View className="flex-1 items-center justify-center bg-black/50 px-5">
           <View className="w-4/5 rounded-xl bg-white p-5">
             <Text className="mb-3 text-center text-lg font-semibold text-primary-600">
@@ -94,29 +96,29 @@ export default function Home({ navigation, onLogout }) {
             <TextInput
               className="mb-3 rounded-md border border-slate-300 px-3 py-2.5 text-base text-slate-900"
               placeholder="Nome do aplicativo"
-              value={nome}
-              onChangeText={setNome}
+              value={passwordLabel}
+              onChangeText={setPasswordLabel}
             />
 
             <TextInput
               className="mb-3 rounded-md border border-slate-300 bg-slate-200 px-3 py-2.5 text-base text-slate-600"
-              value={senha}
+              value={generatedPassword}
               editable={false}
             />
 
             <Pressable
               className={`mt-1 rounded-md bg-blue-500 px-3 py-3 ${
-                nome ? "" : "opacity-50"
+                passwordLabel ? "" : "opacity-50"
               }`}
-              disabled={!nome}
-              onPress={salvar}
+              disabled={!passwordLabel}
+              onPress={handleSavePassword}
             >
               <Text className="text-center font-semibold text-white">CRIAR</Text>
             </Pressable>
 
             <Pressable
               className="mt-2 rounded-md bg-blue-500 px-3 py-3"
-              onPress={() => setModal(false)}
+              onPress={() => setIsSaveModalVisible(false)}
             >
               <Text className="text-center font-semibold text-white">
                 CANCELAR

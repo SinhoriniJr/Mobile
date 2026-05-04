@@ -1,41 +1,41 @@
 import React, { useState } from "react";
 import { View, Text, TextInput, Pressable } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { signin } from "../service/authService";
+import { loginUser } from "../service/authService";
 
 export default function SignIn({ navigation, route, onLogin }) {
   const initialEmail = route.params?.email || "";
   const [email, setEmail] = useState(initialEmail);
-  const [senha, setSenha] = useState("");
+  const [password, setPassword] = useState("");
 
-  const ativo = email !== "" && senha !== "";
+  const isFormValid = email !== "" && password !== "";
 
   const handleLogin = async () => {
     try {
-      const response = await signin({ email, senha });
-      const token = response.data.token;
+      const response = await loginUser({ email, senha: password });
+      const authToken = response.data.token;
 
-      await AsyncStorage.setItem("token", token);
+      await AsyncStorage.setItem("token", authToken);
       onLogin();
 
       alert("Login feito!");
-    } catch (e) {
-      console.log("ERRO LOGIN:", e.response || e);
+    } catch (error) {
+      console.log("ERRO LOGIN:", error.response || error);
 
-      let msg = "Erro no login";
-      const status = e.response?.status;
+      let message = "Erro no login";
+      const status = error.response?.status;
 
       if (status === 404) {
-        msg = "Email nao existente";
+        message = "Email nao existente";
       } else if (status === 401) {
-        msg = "Senha invalida";
+        message = "Senha invalida";
       } else if (status === 400) {
-        msg = "Dados invalidos";
-      } else if (e.response?.data?.message) {
-        msg = e.response.data.message;
+        message = "Dados invalidos";
+      } else if (error.response?.data?.message) {
+        message = error.response.data.message;
       }
 
-      alert(msg);
+      alert(message);
     }
   };
 
@@ -58,15 +58,15 @@ export default function SignIn({ navigation, route, onLogin }) {
       <TextInput
         className="mb-5 rounded-md border border-black bg-accent-500 px-3 py-2.5 text-base text-slate-900"
         secureTextEntry
-        value={senha}
-        onChangeText={setSenha}
+        value={password}
+        onChangeText={setPassword}
       />
 
       <Pressable
         className={`items-center rounded-md px-3 py-3 ${
-          ativo ? "bg-zinc-300" : "bg-zinc-300 opacity-50"
+          isFormValid ? "bg-zinc-300" : "bg-zinc-300 opacity-50"
         }`}
-        disabled={!ativo}
+        disabled={!isFormValid}
         onPress={handleLogin}
       >
         <Text className="font-bold text-slate-900">ENTRAR</Text>

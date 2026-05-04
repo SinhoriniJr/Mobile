@@ -1,10 +1,12 @@
-export function generatePassword() {
-  const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%*";
-  let senha = "";
+export function generateSecurePassword() {
+  const allowedCharacters =
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%*";
+  let generatedPassword = "";
 
-  for (let i = 0; i < 8; i++) {
-    senha += chars[Math.floor(Math.random() * chars.length)];
+  for (let index = 0; index < 8; index += 1) {
+    generatedPassword +=
+      allowedCharacters[Math.floor(Math.random() * allowedCharacters.length)];
   }
 
-  return senha;
+  return generatedPassword;
 }

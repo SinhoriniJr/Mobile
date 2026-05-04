@@ -1,13 +1,13 @@
 import api from "./api";
 
-export const criarSenha = (data) => {
-  return api.post("/senhas", data);
+export const savePasswordEntry = (payload) => {
+  return api.post("/senhas", payload);
 };
 
-export const listarSenhas = () => {
+export const listPasswordEntries = () => {
   return api.get("/senhas");
 };
 
-export const deletarSenha = (id) => {
-  return api.delete(`/senhas/${id}`);
+export const deletePasswordEntry = (passwordId) => {
+  return api.delete(`/senhas/${passwordId}`);
 };
