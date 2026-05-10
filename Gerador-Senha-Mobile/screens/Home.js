@@ -3,12 +3,16 @@ import { View, Text, Pressable, Modal, TextInput } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as Clipboard from "expo-clipboard";
 import { generateSecurePassword } from "../service/passwordService";
-import { savePasswordEntry } from "../service/senhaService";
+import { usePasswordStore } from "../store/passwordStore";
 
 export default function Home({ navigation, onLogout }) {
   const [generatedPassword, setGeneratedPassword] = useState("");
   const [isSaveModalVisible, setIsSaveModalVisible] = useState(false);
   const [passwordLabel, setPasswordLabel] = useState("");
+  const savePassword = usePasswordStore((state) => state.savePassword);
+  const clearLocalPasswords = usePasswordStore((state) => state.clearLocalPasswords);
+  const isOffline = usePasswordStore((state) => state.isOffline);
+  const pendingOperations = usePasswordStore((state) => state.pendingOperations);
 
   const handleGeneratePassword = () => {
     setGeneratedPassword(generateSecurePassword());
@@ -16,7 +20,7 @@ export default function Home({ navigation, onLogout }) {
 
   const handleSavePassword = async () => {
     try {
-      await savePasswordEntry({
+      await savePassword({
         name: passwordLabel,
         pass: generatedPassword,
       });
@@ -37,6 +41,7 @@ export default function Home({ navigation, onLogout }) {
 
   const handleLogout = async () => {
     await AsyncStorage.removeItem("token");
+    clearLocalPasswords();
     onLogout();
     alert("Logout realizado");
   };
@@ -51,6 +56,12 @@ export default function Home({ navigation, onLogout }) {
       <Text className="mb-5 text-center text-3xl font-bold text-primary-600">
         COFRE DE SENHAS
       </Text>
+
+      {(isOffline || pendingOperations.length > 0) && (
+        <Text className="mb-4 text-center text-sm font-semibold text-amber-700">
+          Modo offline: {pendingOperations.length} alteracao(oes) pendente(s)
+        </Text>
+      )}
 
       <Text className="mb-5 text-2xl tracking-[2px] text-slate-900">
         {generatedPassword || "********"}
